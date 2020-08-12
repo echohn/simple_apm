@@ -14,3 +14,8 @@ sql_critical_time: 0.1
 # 不统计的请求(值为：xxxController#Action)（数组）
 #  - Devise::SessionsController#create
 exclude_actions:
+
+# 不纳入 engine 的 url, 完全不需要加载 engine 的情况
+#  - '/api/app_status'
+exclude_urls_in_rake:
+

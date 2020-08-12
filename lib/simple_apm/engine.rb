@@ -5,6 +5,10 @@ module SimpleApm
     end
 
     def call(env)
+      if SimpleApm::Setting::EXCLUDE_URLS_IN_RAKE.include? env['ORIGINAL_FULLPATH']
+        return @app.call(env)
+      end
+
       if SimpleApm::Redis.ping && SimpleApm::Redis.running?
         SimpleApm::ProcessingThread.start!
         Thread.current['action_dispatch.request_id'] = env['action_dispatch.request_id']

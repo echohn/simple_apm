@@ -15,5 +15,8 @@ module SimpleApm
     # 不纳入统计的action
     t = ApmSettings['exclude_actions']
     EXCLUDE_ACTIONS = t.is_a?(Array) ? t : [t]
+    # engine 跳过加载的 url
+    tt = ApmSettings['exclude_urls_in_rake']
+    EXCLUDE_URLS_IN_RAKE = tt.is_a?(Array) ? tt : [tt]
   end
 end
