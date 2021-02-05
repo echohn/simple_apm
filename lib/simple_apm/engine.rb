@@ -22,6 +22,14 @@ module SimpleApm
   class Engine < ::Rails::Engine
     isolate_namespace SimpleApm
     config.app_middleware.use SimpleApm::Rack
+    config.assets.precompile += %w(
+      simple_apm/bootstrap.min.js
+      simple_apm/echarts.js
+      simple_apm/jquery.dataTables.min.js
+      simple_apm/jquery.min.js
+      simple_apm/bootstrap.min.css
+      simple_apm/jquery.dataTables.min.css
+    )
   end
 
 end
