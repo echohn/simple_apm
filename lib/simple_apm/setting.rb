@@ -1,7 +1,8 @@
 module SimpleApm
   class Setting
     ApmSettings = YAML.load(ERB.new(File.read("config/simple_apm.yml")).result) rescue {}
-    REDIS_URL = ApmSettings['redis_url'].presence || 'redis://localhost:6379/0'
+
+    # REDIS_URL 现在直接从环境变量中读取
     # nil , hiredis ...
     REDIS_DRIVER = ApmSettings['redis_driver']
     # 最慢的请求数存储量

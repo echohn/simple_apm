@@ -24,8 +24,9 @@ module SimpleApm
             driver: SimpleApm::Setting::REDIS_DRIVER
           )
         else
+          redis_url = ENV['REDIS_URL'] || 'redis://localhost:6379/0'
           ::Redis.new(
-            url:    SimpleApm::Setting::REDIS_URL,
+            url:    redis_url,
             driver: SimpleApm::Setting::REDIS_DRIVER
           )
         end
