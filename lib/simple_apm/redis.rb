@@ -13,13 +13,13 @@ module SimpleApm
 
       def redis_instance
         if ENV['SENTINEL_ENABLE']
-          SENTINELS = ENV['SENTINEL_HOSTS'].split(' ').map! do |host|
+          sentinels = ENV['SENTINEL_HOSTS'].split(' ').map do |host|
             { host: host, port: ENV['SENTINEL_PORT'] }
           end
 
           ::Redis.new(
             url: ENV['SENTINEL_URL'],
-            sentinels: SENTINELS,
+            sentinels: sentinels,
             role: :master,
             driver: SimpleApm::Setting::REDIS_DRIVER
           )
