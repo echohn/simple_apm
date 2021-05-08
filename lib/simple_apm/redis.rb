@@ -7,11 +7,28 @@ module SimpleApm
       def instance
         @current ||= ::Redis::Namespace.new(
           "simple_apm:#{SimpleApm::Setting::APP_NAME}",
-          :redis => ::Redis.new(
-            url: SimpleApm::Setting::REDIS_URL,
+          :redis => redis_instance
+        )
+      end
+
+      def redis_instance
+        if ENV['SENTINEL_ENABLE']
+          SENTINELS = ENV['SENTINEL_HOSTS'].split(' ').map! do |host|
+            { host: host, port: ENV['SENTINEL_PORT'] }
+          end
+
+          ::Redis.new(
+            url: ENV['SENTINEL_URL'],
+            sentinels: SENTINELS,
+            role: :master,
             driver: SimpleApm::Setting::REDIS_DRIVER
           )
-        )
+        else
+          ::Redis.new(
+            url:    SimpleApm::Setting::REDIS_URL,
+            driver: SimpleApm::Setting::REDIS_DRIVER
+          )
+        end
       end
 
       # http://redisdoc.com/server/info.html
@@ -37,26 +54,26 @@ module SimpleApm
 
       # 所有统计的日期，通过hits来判断
       def in_apm_days
-        SimpleApm::Redis.keys('*:action-names').map{|x|x.split(':').first}.sort.reverse
+        SimpleApm::Redis.keys('*:action-names').map { |x| x.split(':').first }.sort.reverse
       end
 
       # 清理指定日期之前的数据
       def clear_data_before_time(date)
         i = 0
         SimpleApm::Redis.in_apm_days.each do |d|
-          SimpleApm::Redis.clear_data(d) and i+=1 if Time.parse(d) <= date
+          SimpleApm::Redis.clear_data(d) and i += 1 if Time.parse(d) <= date
         end
         i
       end
 
       def clear_data(date_str)
-        return {success: false, msg: '当日没有数据'} unless in_apm_days.include?(date_str)
+        return { success: false, msg: '当日没有数据' } unless in_apm_days.include?(date_str)
         keys = SimpleApm::Redis.keys("#{date_str}:*")
-        {success: true, msg: SimpleApm::Redis.del(keys)}
+        { success: true, msg: SimpleApm::Redis.del(keys) }
       end
 
       def running?
-        hget('status','running').to_s != 'false'
+        hget('status', 'running').to_s != 'false'
       rescue
         false
       end
@@ -82,9 +99,9 @@ module SimpleApm
     class << self
       def set_query_date(d = nil)
         if block_given?
-          _ = query_date
+          _                                = query_date
           Thread.current['apm_query_date'] = d
-          res = yield
+          res                              = yield
           Thread.current['apm_query_date'] = _
           res
         else
@@ -101,7 +118,7 @@ module SimpleApm
       end
 
       def [](key, _date = nil)
-        "#{_date||query_date}:#{key}"
+        "#{_date || query_date}:#{key}"
       end
     end
   end
